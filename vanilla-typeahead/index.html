@@ -71,6 +71,10 @@
             text-align: center;
             margin: 10px;
         }
+
+        #clickedNames {
+            margin-top: 100px;
+        }
     </style>
 
     <div class="container">
@@ -81,9 +85,65 @@
         </div>
     </div>
 
+    <div class="container">
+        <div id="clickedNames">
+            <ul>
+
+            </ul>
+        </div>
+    </div>
+
 </body>
 
 <script>
+    let characters = [];
+    let clickedNames = [];
+    let list = document.querySelector('#list');
+    let search = document.querySelector('input');
+    let clickedNamesList = document.querySelector('#clickedNames ul');
+
+    if (document.querySelectorAll('ul li').length === 0) {
+        list.style.visibility = 'hidden';
+    }
+
+    fetch('https://swapi.co/api/people')
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (response) {
+            return characters.push(...response.results);
+        });
+
+    function filterText() {
+        let filtered = characters
+            .filter(a => a.name.toLowerCase().includes(this.value.toLowerCase()))
+            .filter(a => !clickedNames.includes(a.name))
+            .map(a => `<li>${a.name}</li>`)
+        filtered.length > 0 ? render(filtered) : filtered;
+        list.style.visibility = 'visible';
+        if (search.value === '' || filtered.length === 0) {
+            list.style.visibility = 'hidden';
+        }
+
+        list.addEventListener('click', function (event) {
+            event.stopImmediatePropagation();
+            console.log(clickedNames)
+            list.style.visibility = "hidden";
+            let clickedListItem = event.target.innerHTML;
+            clickedNames.push(clickedListItem);
+            let clickDivItem = document.createElement('li');
+            clickDivItem.innerHTML = event.target.innerHTML;
+            clickedNamesList.append(clickDivItem);
+            console.log(clickedListItem);
+        })
+    }
+
+    function render(array) {
+        let html = array.join('');
+        list.innerHTML = html;
+    }
+
+    search.addEventListener('keyup', filterText);
 </script>
 
 </html>
